@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         //drawButton.setOnClickListener(surfaceView);
         //eraseButton.setOnClickListener(surfaceView);
 
+        // start animating the surface afer I ahve se tup everything elswe
+        Thread thread = new Thread(surfaceView);
+        thread.start();
 
     }
 }

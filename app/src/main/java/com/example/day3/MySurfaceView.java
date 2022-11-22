@@ -1,5 +1,7 @@
 package com.example.day3;
 
+import static java.lang.Thread.sleep;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,10 +24,11 @@ import java.util.ArrayList;
 // *** in the xml file so that it knows to use this more specific
 // *** version of a SurfaceView
 public class MySurfaceView extends SurfaceView
-        implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, View.OnTouchListener{
+        implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, View.OnTouchListener, Runnable{
 
     //View.OnClickListener{
 
+    private MonopolyState.Token token;
     private Spot theBigRedSpot;
     private TextView circleSizeTextView; // originally a null references, to fix this, add a setter function
     private Paint imgPaint;
@@ -56,10 +59,12 @@ public class MySurfaceView extends SurfaceView
         Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.shrek);
         canvas.drawBitmap(image, 550, 50, imgPaint);
 
-        for(Spot s : spots) {
-            s.draw(canvas);
+        synchronized(spots) {
+            for (Spot s : spots) {
+                s.draw(canvas);
+            }
         }
-        Log.d("onDraw","drwew "+spots.size()+" spots");
+        Log.d("onDraw","drew "+spots.size()+" spots");
     }
 
     @Override
@@ -112,7 +117,9 @@ public class MySurfaceView extends SurfaceView
             s.setCenters(x, y);
             s.setRandomColor();
             // 3. add this new spot to my list of spots
-            spots.add(s);
+            synchronized(spots) {
+                spots.add(s);
+            }
             // 4. tell myself to update/draw again soon
             invalidate();
 
@@ -120,4 +127,32 @@ public class MySurfaceView extends SurfaceView
         }
         return false; // in this case we didn't do anything
     }
-}
+
+    // this method is runnable but is never used because we didn't create a thread for it yet, do so in main activity
+    // when run, will give error because when changing color, we are modifying two things at a a time, the color, and the number of spots in the spots array
+    // there you could be adding or removing dots in the array while also changing the color of those spots.
+    // have to syncrhonize - only use for methods that you think is changing the spots array simultaneously with smth else
+    // DONT DO WHOLE METHOD, DO AS LITTLE AS POSSIBLE (MAYBE A FEW LINES OF THE METHOD ONLY)
+    @Override
+    public void run() {
+        // Goal: animate the spots by randomly changing colors
+        // We will do this every so often
+        while(true) {
+            // sleep for a bit...
+            try { // try to run this code
+            sleep((int)(Math.random() % 2000));
+            }
+            catch(InterruptedException e) {
+                // ...and if i get a specific error, then i dont care that it was interrupted, so do nothing
+            }
+            // update colors
+            synchronized(spots) {
+                for (Spot s : spots) {
+                    s.setRandomColor();
+                }
+            }
+            this.postInvalidate();
+            }
+        }
+    }
+

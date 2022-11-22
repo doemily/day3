@@ -41,7 +41,7 @@ public class Spot {
         // this.cy = other.cy; // could use this.cy or cy
         // first create new container (array, arrayList, etc.)
         // copy each item into new container
-        // !!!!!! count the news when creating a copy constructor (MIDTERM) !!!!!!
+        // !!!!!! count the NEWs when creating a copy constructor (MIDTERM) !!!!!!
         centers = new float[2]; // exact line from default constructor
         for (int i = 0; i < centers.length; i++) {
             // if og item is an object that was allocated anywhere with a NEW, this must also create a new object
